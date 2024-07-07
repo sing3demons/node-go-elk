@@ -5,7 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
+env:
+  DOCKER_IMAGE: ghcr.io/sing3demons/go-service:1.0.0
 jobs:
   build-and-push-docker-image:
     name: Build Docker image and push to repositories
@@ -20,32 +21,49 @@ jobs:
     - name: Build the Docker image go
       run: docker build ./go-service --file ./go-service/Dockerfile --tag ghcr.io/sing3demons/go-service:${{ env.GITHUB_SHA }}
 
-    - name: Build the Docker image node
-      run: docker build ./node_express --file ./node_express/Dockerfile --tag ghcr.io/sing3demons/node-service:${{ env.GITHUB_SHA }}
-
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v1.8.0
+    - name: Login ghcr.io
+      uses: docker/login-action@v2
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GHCR_PAT }}
-
-    - name: Push [go] to GitHub Container Registry
-      uses: docker/build-push-action@v2
+        password: ${{ secrets.GITHUB_TOKEN }}
+        logout: true
+    - name: Push to GitHub Container Registry
+      uses: docker/build-push-action@v4
       with:
         context: ./go-service
         file: ./go-service/Dockerfile
         tags: ghcr.io/sing3demons/go-service:${{ env.GITHUB_SHA }}
-        push: ${{ github.ref == 'refs/heads/main' }}
+        push: true
+    - name: Echo the Docker image name
+      run: echo ghcr.io/sing3demons/go-service:${{ env.GITHUB_SHA }}
 
-    - name: Push [node] to GitHub Container Registry
-      uses: docker/build-push-action@v2
-      with:
-        context: ./node_express
-        file: ./node_express/Dockerfile
-        tags: ghcr.io/sing3demons/node-service:${{ env.GITHUB_SHA }}
-        push: ${{ github.ref == 'refs/heads/main' }}
+    # - name: Build the Docker image node
+    #   run: docker build ./node_express --file ./node_express/Dockerfile --tag ghcr.io/sing3demons/node-service:${{ env.GITHUB_SHA }}
 
-    - name: Image digest
-      run: echo ${{ steps.docker_build.outputs.digest }}
+    # - name: Login to GitHub Container Registry
+    #   uses: docker/login-action@v1.8.0
+    #   with:
+    #     registry: ghcr.io
+    #     username: ${{ github.actor }}
+    #     password: ${{ secrets.GHCR_PAT }}
+
+    # - name: Push [go] to GitHub Container Registry
+    #   uses: docker/build-push-action@v2
+    #   with:
+    #     context: ./go-service
+    #     file: ./go-service/Dockerfile
+    #     tags: ghcr.io/sing3demons/go-service:${{ env.GITHUB_SHA }}
+    #     push: ${{ github.ref == 'refs/heads/main' }}
+
+    # - name: Push [node] to GitHub Container Registry
+    #   uses: docker/build-push-action@v2
+    #   with:
+    #     context: ./node_express
+    #     file: ./node_express/Dockerfile
+    #     tags: ghcr.io/sing3demons/node-service:${{ env.GITHUB_SHA }}
+    #     push: ${{ github.ref == 'refs/heads/main' }}
+
+    # - name: Image digest
+    #   run: echo ${{ steps.docker_build.outputs.digest }}
 
