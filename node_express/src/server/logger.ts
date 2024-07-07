@@ -468,15 +468,15 @@ const masking = new Map<string, string>()
 const response = new WeakMap()
 
 export interface IDetailLog {
-    addRequestBody<T>(msg: string, body: T): IDetailLog
-    addRequestQuery(msg: string, query: any, cmd?: string): IDetailLog
-    addRequestParams(msg: string, params: any, cmd?: string): IDetailLog
-    addRequestHeaders(msg: string, headers: any, cmd?: string): IDetailLog
-    addResponseBody(msg: string, body: any, cmd?: string): IDetailLog
+    addRequestBody<T>(node: string, msg: string, body: T): IDetailLog
+    addRequestQuery(node: string, msg: string, query: any, cmd?: string): IDetailLog
+    addRequestParams(node: string, msg: string, params: any, cmd?: string): IDetailLog
+    addRequestHeaders(node: string, msg: string, headers: any, cmd?: string): IDetailLog
+    addResponseBody(node: string, msg: string, body: any, cmd?: string): IDetailLog
     addResponseSuccess<T>(node: string, cmd: string, resultCode: string, data?: T): IDetailLog
-    addResponseError(error: any, cmd?: string): void
+    addResponseError(node: string, error: any, cmd?: string): void
     setSensitiveMasking(data: IMarking[]): IDetailLog
-    addDetail<T>(cmd: string, data: T): IDetailLog
+    addDetail<T>(node: string, cmd: string, data: T): IDetailLog
     end(): void
 }
 
@@ -495,16 +495,17 @@ export class DetailLog implements IDetailLog {
         this.res = res
         this.log = logger.child({ session })
     }
-    addDetail<T>(cmd: string, data?: T) {
+    addDetail<T>(node: string, cmd: string, data?: T) {
         let msg = data ? { [cmd]: data } : { message: cmd }
-        this.context = { ...this.context, ...msg }
+        this.context = { node, ...this.context, ...msg }
         return this
     }
 
-    addRequestBody<T>(msg: string, body: T) {
+    addRequestBody<T>(node: string, msg: string, body: T) {
         this.context = {
             ...this.context,
             request: {
+                node,
                 ...this.context.request,
                 [`body.${msg}`]: body
             }
@@ -519,10 +520,11 @@ export class DetailLog implements IDetailLog {
         return this
     }
 
-    addRequestQuery<T>(msg: string, query: T) {
+    addRequestQuery<T>(node: string, msg: string, query: T) {
         this.context = {
             ...this.context,
             request: {
+                node,
                 ...this.context.request,
                 [`query.${msg}`]: query
             }
@@ -532,10 +534,11 @@ export class DetailLog implements IDetailLog {
 
 
 
-    addRequestParams<T>(msg: string, params: T) {
+    addRequestParams<T>(node: string, msg: string, params: T) {
         this.context = {
             ...this.context,
             request: {
+                node,
                 ...this.context.request,
                 [`params.${msg}`]: params
             }
@@ -543,10 +546,11 @@ export class DetailLog implements IDetailLog {
         return this
     }
 
-    addRequestHeaders<T>(msg: string, headers: T) {
+    addRequestHeaders<T>(node: string, msg: string, headers: T) {
         this.context = {
             ...this.context,
             request: {
+                node,
                 ...this.context.request,
                 [`headers.${msg}`]: headers
             }
@@ -554,8 +558,9 @@ export class DetailLog implements IDetailLog {
         return this
     }
 
-    addResponseBody<T>(msg: string, body: T) {
+    addResponseBody<T>(node: string, msg: string, body: T) {
         this.context = {
+            node,
             ...this.context,
             response: {
                 ...this.context.response,
@@ -581,7 +586,7 @@ export class DetailLog implements IDetailLog {
         return this
     }
 
-    addResponseError<T extends unknown>(cmd: string, error: T) {
+    addResponseError<T extends unknown>(node: string, cmd: string, error: T) {
         let message = '', name = '', stack = ''
         if (error instanceof Error) {
             message = error.message
@@ -591,6 +596,7 @@ export class DetailLog implements IDetailLog {
         this.context = {
             ...this.context,
             response: {
+                node,
                 ...this.context.response,
                 success: false,
                 error: {
@@ -610,7 +616,6 @@ export class DetailLog implements IDetailLog {
         this.res = {} as Response
     }
     private masking = <T>(obj: T, { key, value }: IMarking): T => {
-        console.log('========================,key', key, value)
         if (typeof obj === 'undefined') {
             return obj
         }
