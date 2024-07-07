@@ -32,11 +32,18 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         logout: true
     
-    - name: Push to GitHub Container Registry
+    - name: Push [go] to GitHub Container Registry
       uses: docker/build-push-action@v2
       with:
         context: .
-        tags: ghcr.io/sing3demons/devops-go:${{ env.GITHUB_SHA }}
+        tags: ghcr.io/sing3demons/go-serviceo:${{ env.GITHUB_SHA }}
+        # build on feature branches, push only on main branch
+        push: ${{ github.ref == 'refs/heads/main' }}
+    - name: Push [node] to GitHub Container Registry
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        tags: ghcr.io/sing3demons/node-serviceo:${{ env.GITHUB_SHA }}
         # build on feature branches, push only on main branch
         push: ${{ github.ref == 'refs/heads/main' }}
       
