@@ -43,8 +43,8 @@ class Server implements IServer {
         // return this
     }
     // app.use(new MyRouter().Register(new ExampleController(myRoute)).instance)
-    public route = (path: string, classInstance: object) => {
-        this.app.use(path, new MyRouter().Register(classInstance).instance)
+    public route = (path: string, classInstance: object, ...middleware: RequestHandler[]) => {
+        this.app.use(path, ...middleware, new MyRouter().Register(classInstance).instance)
         return this
     }
 
