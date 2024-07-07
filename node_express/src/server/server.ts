@@ -48,6 +48,11 @@ class Server implements IServer {
         return this
     }
 
+    public routeWithMiddleware = (path: string, classInstance: object, ...middleware: RequestHandler[]) => {
+        this.app.use(path, ...middleware, new MyRouter().Register(classInstance).instance)
+        return this
+    }
+
     private get = (path: string, handler: RequestHandler) => {
         this.app.get(path, handler)
         return this
