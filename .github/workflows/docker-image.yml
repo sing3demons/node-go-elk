@@ -19,9 +19,10 @@ jobs:
       run: echo "GITHUB_SHA=${GITHUB_SHA}" >> $GITHUB_ENV
 
     - name: Build the Docker image go
-      run: docker build . --file ./go-service/Dockerfile --tag ghcr.io/sing3demons/go-service:${{ env.GITHUB_SHA }}
+      run: docker build ./go-service --file ./go-service/Dockerfile --tag ghcr.io/sing3demons/go-service:${{ env.GITHUB_SHA }}
+
     - name: Build the Docker image node
-      run: docker build . --file ./node_express/Dockerfile --tag ghcr.io/sing3demons/node-service:${{ env.GITHUB_SHA }}
+      run: docker build ./node_express --file ./node_express/Dockerfile --tag ghcr.io/sing3demons/node-service:${{ env.GITHUB_SHA }}
 
     - name: Login ghcr.io
       uses: docker/login-action@v1.8.0
