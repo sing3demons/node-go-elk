@@ -31,8 +31,7 @@ jobs:
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        logout: true
+        password: ${{ secrets.GHCR_PAT }}
 
     - name: Push to GitHub Container Registry
       uses: docker/build-push-action@v4
