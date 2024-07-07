@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const Todo = z.object({
-    id: z.number(),
+    id: z.string(),
     href: z.string().optional(),
     name: z.string(),
     description: z.string(),

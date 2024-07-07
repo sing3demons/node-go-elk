@@ -1,12 +1,10 @@
 import { faker } from '@faker-js/faker';
 import { IQueryTodo, IResponseTodo, ITodo } from './model';
+import { Database } from './database';
 
 
 export class TodoService {
-    data: ITodo[] = []
-    constructor() {
-
-        this.data = this.generateTodo()
+    constructor(private readonly db: Database<ITodo>) {
     }
 
     getTodos = async (q: IQueryTodo) => {
@@ -14,12 +12,14 @@ export class TodoService {
         const { fetch, offset } = this.pagination(page, limit)
         const response: IResponseTodo = {
             data: [],
-            total: this.data.length,
+            total: 0,
             page,
             pageSize: limit
         }
+        const data: ITodo[] = await this.db.readAll() as unknown as ITodo[]
+        response.total = data.length
         if (name) {
-            const data = this.data.filter((todo) => todo.name.includes(name))
+            data.filter((todo) => todo.name.includes(name))
             response.data = data.slice(offset, offset + fetch).sort((a, b) => {
                 if (order === 'asc') {
                     return a.name.localeCompare(b.name)
@@ -29,7 +29,7 @@ export class TodoService {
             })
         }
         if (sort) {
-            response.data = this.data.slice(offset, offset + fetch).sort((a, b) => {
+            response.data = data.slice(offset, offset + fetch).sort((a, b) => {
                 if (order === 'asc') {
                     return a.name.localeCompare(b.name)
                 } else {
@@ -37,33 +37,24 @@ export class TodoService {
                 }
             })
         }
-        response.data = this.data.slice(offset, offset + fetch).sort((a, b) => {
-            if (order === 'asc') {
-                return a.name.localeCompare(b.name)
-            } else {
-                return b.name.localeCompare(a.name)
-            }
-        })
+
+        response.data = data
+            .slice(offset, offset + fetch).sort((a, b) => {
+                if (order === 'asc') {
+                    return a.name.localeCompare(b.name)
+                } else {
+                    return b.name.localeCompare(a.name)
+                }
+            })
 
         return response
     }
 
-    getTodo = async (id: number) => {
-        return this.data.find((todo) => todo.id === id)
+    getTodo = async (id: string) => {
+        const data = await this.db.readAll() as unknown as ITodo[]
+        return data.find((todo) => todo.id === id)
     }
 
-    private generateTodo = () => {
-        const todos = []
-
-        for (let i = 0; i < 100; i++) {
-            todos.push({
-                id: i + 1,
-                name: faker.lorem.words({ max: 20, min: 5 }),
-                description: faker.lorem.words({ max: 100, min: 10 })
-            })
-        }
-        return todos
-    }
 
     private pagination = (pageNumber: number, pageSize: number) => {
         const page: number = pageNumber ? pageNumber : 1

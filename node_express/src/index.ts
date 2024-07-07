@@ -1,7 +1,10 @@
+import { faker } from '@faker-js/faker'
 import Logger, { LoggerType } from './server/logger'
 import { IRoute, TypeRoute, t } from './server/my-router'
 import Server from './server/server'
+import { Database } from './todo/database'
 import { TodoHandler } from './todo/handler'
+import { ITodo } from './todo/model'
 import { TodoService } from './todo/service'
 
 
@@ -11,7 +14,21 @@ const PORT = process.env.PORT ?? 3000
 const myRoute: IRoute = new TypeRoute()
 const logger = new Logger()
 
-const todoService = new TodoService()
+const db = new Database<ITodo>('todo', {
+    defaultData: (() => {
+        const todos = []
+        for (let i = 0; i < 100; i++) {
+            todos.push({
+                id: faker.string.uuid(),
+                name: faker.lorem.words({ max: 20, min: 5 }),
+                description: faker.lorem.words({ max: 100, min: 10 })
+            })
+        }
+        return todos
+    })()
+})
+db.init()
+const todoService = new TodoService(db)
 
 app.route('/todo', new TodoHandler(myRoute, logger, todoService))
 

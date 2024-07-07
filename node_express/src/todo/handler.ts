@@ -75,7 +75,7 @@ export class TodoHandler extends ASCommon {
         try {
             detailLog.addDetail(this.scriptName, 'Get Todo By Id')
 
-            const result = await this.todoService.getTodo(Number(params.id))
+            const result = await this.todoService.getTodo(params.id)
             detailLog.addResponseSuccess(this.scriptName, 'success', '200', result)
 
             return {
