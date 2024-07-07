@@ -1,10 +1,9 @@
-name: Build and Push Docker Images
-
+name: Docker Image CI
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
 
 env:
   DOCKER_IMAGE: ghcr.io/sing3demons/go-service:1.0.0
@@ -16,30 +15,28 @@ jobs:
     permissions:
       contents: read
       packages: write
-
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Setup SHA
-      run: echo "GITHUB_SHA=${GITHUB_SHA}" >> $GITHUB_ENV
+      - name: Setup SHA
+        run: echo "GITHUB_SHA=${GITHUB_SHA}" >> $GITHUB_ENV
 
-    - name: Build the Docker image go
-      run: docker build ./go-service --file ./go-service/Dockerfile --tag ghcr.io/sing3demons/go-service:${{ env.GITHUB_SHA }}
+      - name: Build the Docker image
+        run: docker build ./go-service --file ./go-service/Dockerfile --tag ${{env.DOCKER_IMAGE}}
 
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GHCR_PAT }}
+      - name: Login ghcr.io
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          logout: true
 
-    - name: Push to GitHub Container Registry
-      uses: docker/build-push-action@v4
-      with:
-        context: ./go-service
-        file: ./go-service/Dockerfile
-        tags: ghcr.io/sing3demons/go-service:${{ env.GITHUB_SHA }}
-        push: true
-
-    - name: Echo the Docker image name
-      run: echo ghcr.io/sing3demons/go-service:${{ env.GITHUB_SHA }}
+      - name: Push to GitHub Container Registry
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          tags: ${{env.DOCKER_IMAGE}}
+          push: true
+      - name: Echo the Docker image name
+        run: echo ${{env.DOCKER_IMAGE}}
