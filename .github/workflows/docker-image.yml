@@ -35,7 +35,8 @@ jobs:
       - name: Push to GitHub Container Registry
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./go-service
+          file: ./go-service/Dockerfile
           tags: ${{env.DOCKER_IMAGE}}
           push: true
       - name: Echo the Docker image name
