@@ -1,0 +1,27 @@
+name: logger-service
+
+networks:
+  ms-service:
+    name: ms-service
+
+services:
+  go-app:
+    image: go-service
+    container_name: go-app
+    build:
+      context: ./go-service
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - ms-service
+  node-app:
+    image: node-service
+    container_name: node-app
+    build:
+      context: ./node_express
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - ms-service

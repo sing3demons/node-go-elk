@@ -1,0 +1,33 @@
+filebeat.inputs:
+  - type: container
+    paths:
+      - "/var/lib/docker/containers/*/*.log"
+
+processors:
+  - add_docker_metadata:
+      host: "unix:///var/run/docker.sock"
+
+  - decode_json_fields:
+      fields: ["message"]
+      target: "json"
+      overwrite_keys: true
+  - drop_event:
+      when:
+        not:
+          or:
+            - equals:
+                container.name: "node-app"
+            - equals:
+                container.name: "go-app"
+
+output.kafka:
+  hosts: ["broker:9092"]
+  topic: "write-logs"
+  partition.round_robin:
+    reachable_only: false
+  required_acks: 1
+  compression: gzip
+  max_message_bytes: 1000000
+
+logging.json: true
+logging.metrics.enabled: false
