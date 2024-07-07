@@ -9,3 +9,7 @@ docker compose -f elk-docker/docker-compose.yml
 docker compose down
 docker compose -f elk-docker/docker-compose.yml down
 ```
+
+```
+npm version patch
+```
