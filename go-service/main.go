@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/sing3demons/go-elk/todo"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -28,27 +28,11 @@ func main() {
 	//     log.SetOutput(file)
 	//   }
 	//   defer file.Close()
-	http.HandleFunc("/todos", func(w http.ResponseWriter, r *http.Request) {
-		log.WithFields(log.Fields{"method": r.Method, "path": r.URL.Path}).Info("Request received")
-		data := []Todo{
-			{ID: 1, Name: "todo1"},
-			{ID: 2, Name: "todo2"},
-		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		log.WithFields(log.Fields{
-			"status":  http.StatusOK,
-			"message": "Response sent",
-			"method":  r.Method,
-			"path":    r.URL.Path,
-			"data":    data,
-			"ip":      r.RemoteAddr,
-			"host":    r.Host,
-			"agent":   r.UserAgent(),
-		}).Info("Response sent")
-		json.NewEncoder(w).Encode(&data)
-	})
+	todoHandler := todo.New("http://localhost:3000")
+
+	http.HandleFunc("GET /todos/{id}", todoHandler.GetTodoByID)
+	http.HandleFunc("GET /todos", todoHandler.GetTodos)
 
 	port := "8080"
 
@@ -81,9 +65,4 @@ func main() {
 	}
 
 	log.Println("Server exiting")
-}
-
-type Todo struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
 }
