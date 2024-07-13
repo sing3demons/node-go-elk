@@ -1,14 +1,7 @@
 package main
 
 import (
-	"context"
-	"errors"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
+	"github.com/sing3demons/go-elk/router"
 	"github.com/sing3demons/go-elk/todo"
 	log "github.com/sirupsen/logrus"
 )
@@ -31,38 +24,12 @@ func main() {
 
 	todoHandler := todo.New("http://localhost:3000")
 
-	http.HandleFunc("GET /todos/{id}", todoHandler.GetTodoByID)
-	http.HandleFunc("GET /todos", todoHandler.GetTodos)
+	router := router.NewRouter()
+	router.GET("/todos/{id}", todoHandler.GetTodoByID)
+	router.GET("/todos", todoHandler.GetTodos)
 
-	port := "8080"
+	// http.HandleFunc("GET /todos/{id}", todoHandler.GetTodoByID)
+	// http.HandleFunc("GET /todos", todoHandler.GetTodos)
 
-	srv := &http.Server{
-		Addr:         ":" + port,
-		Handler:      http.DefaultServeMux,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
-
-	go func() {
-		log.Printf("Running on port %s", srv.Addr)
-		if err := srv.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
-			log.Printf("Server is not running : %v", err)
-		}
-	}()
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	log.Println("Shutting down server...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced to shutdown: %v", err)
-		os.Exit(1)
-	}
-
-	log.Println("Server exiting")
+	router.StartHttp("8080")
 }
