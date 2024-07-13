@@ -37,26 +37,29 @@ func NewRouter() Router {
 
 func (r *myRouter) GET(path string, handler http.HandlerFunc) {
 	r.addRoute("GET ", path, handler)
-
 }
 
 func (r *myRouter) POST(path string, handler http.HandlerFunc) {
 	r.addRoute("POST ", path, handler)
-
 }
 
 func (r *myRouter) PUT(path string, handler http.HandlerFunc) {
 	r.addRoute("PUT ", path, handler)
-
 }
 
-// addRoute
+func (r *myRouter) PATCH(path string, handler http.HandlerFunc) {
+	r.addRoute("PATCH ", path, handler)
+}
+
+func (r *myRouter) DELETE(path string, handler http.HandlerFunc) {
+	r.addRoute("DELETE ", path, handler)
+}
+
 func (r *myRouter) addRoute(method string, path string, handler http.HandlerFunc) {
-	r.HandleFunc(method+""+path, handler)
+	r.HandleFunc(method+path, handler)
 }
 
 func (r *myRouter) Logger(next http.Handler) http.Handler {
-	//x-transaction-id
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Request URI: %s", r.RequestURI)
 		start := time.Now()
