@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
-import Logger, { LoggerType } from './server/logger'
-import { IRoute, TypeRoute, t } from './server/my-router'
+import Logger from './server/logger'
+import { IRoute, TypeRoute } from './server/my-router'
 import Server from './server/server'
 import { Database } from './todo/database'
 import { TodoHandler } from './todo/handler'
@@ -27,9 +27,13 @@ const db = new Database<ITodo>('todo', {
         return todos
     })()
 })
-db.init()
+
+app.use(async (req, res, next) => {
+    await db.init()
+    next()
+})
 const todoService = new TodoService(db)
 
 app.route('/todo', new TodoHandler(myRoute, logger, todoService))
 
-app.listen(PORT)
+app.listen(PORT, () => db.close())

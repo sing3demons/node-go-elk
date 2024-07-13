@@ -83,7 +83,7 @@ class Server implements IServer {
         return this
     }
 
-    public listen = (port: number | string) => {
+    public listen = (port: number | string,cb?: () => Promise<void> | void) => {
         this.app.use((req: Request, res: Response, _next: NextFunction) => {
             res.status(404).json({ message: 'Unknown URL', path: req.originalUrl })
         })
@@ -107,6 +107,7 @@ class Server implements IServer {
                 console.log(`Received ${signal}, shutting down gracefully...`);
                 server.close(() => {
                     console.log('Closed out remaining connections.');
+                    cb?.()
                     process.exit(0);
                 });
 
@@ -116,6 +117,7 @@ class Server implements IServer {
                     connections.forEach((connection) => {
                         connection.destroy();
                     });
+                    cb?.()
                     process.exit(1);
                 }, 10000);
             });

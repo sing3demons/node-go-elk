@@ -32,6 +32,12 @@ export class Database<Entity extends object & { id: string }> {
         return this;
     }
 
+    async close () {
+        if (fsSync.existsSync(this.databasePath)) {
+            await fs.unlink(this.databasePath);
+        }
+    }
+
     async readAll() {
         await this.init();
         const data = await fs.readFile(this.databasePath, "utf-8");

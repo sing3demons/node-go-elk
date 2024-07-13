@@ -7,7 +7,7 @@ import { IQueryTodoSchema, ParamTodoSchema, ITodo } from "./model"
 import type { Request } from "express"
 
 export class TodoHandler extends ASCommon {
-    private readonly host = 'http://localhost:3000'
+    private readonly host = process.env.api_prefix ?? 'http://localhost:3000'
     constructor(
         private readonly myRoute: IRoute,
         private readonly logger: LoggerType,
@@ -77,6 +77,14 @@ export class TodoHandler extends ASCommon {
 
             const result = await this.todoService.getTodo(params.id)
             detailLog.addResponseSuccess(this.scriptName, 'success', '200', result)
+
+            if (!result) {
+                return {
+                    success: false,
+                    message: 'Data not found',
+                    data: {}
+                }
+            }
 
             return {
                 success: true,
