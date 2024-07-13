@@ -6,11 +6,14 @@ import { Database } from './todo/database'
 import { TodoHandler } from './todo/handler'
 import { ITodo } from './todo/model'
 import { TodoService } from './todo/service'
+import config from './server/config'
+
+
 
 
 const app = new Server()
 
-const PORT = process.env.PORT ?? 3000
+const PORT = config.get('port')
 const myRoute: IRoute = new TypeRoute()
 const logger = new Logger()
 

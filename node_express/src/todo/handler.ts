@@ -5,9 +5,10 @@ import path from "path"
 import { TodoService } from "./service"
 import { IQueryTodoSchema, ParamTodoSchema, ITodo } from "./model"
 import type { Request } from "express"
+import config from "../server/config"
 
 export class TodoHandler extends ASCommon {
-    private readonly host = process.env.api_prefix ?? 'http://localhost:3000'
+    private readonly host = config.get('host')
     constructor(
         private readonly myRoute: IRoute,
         private readonly logger: LoggerType,
